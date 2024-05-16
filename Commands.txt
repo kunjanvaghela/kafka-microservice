@@ -1,0 +1,50 @@
+Kafka Setup Steps:
+
+1. Connect to the EC2 instance:
+    ssh -i <key.pem> ec2-user@<machine-url>
+
+2. Install kafka:
+    wget https://downloads.apache.org/kafka/3.7.0/kafka_2.12-3.7.0.tgz
+    tar -xvf kafka_2.12-3.7.0.tgz
+
+3. Install Java:
+    java -version
+    sudo yum install java-1.8.0-openjdk
+    java -version
+
+4. Start Zoo-keeper, Kafka-server servers:
+    cd kafka_2.12-3.7.0
+    bin/zookeeper-server-start.sh config/zookeeper.properties
+
+5. Configure and start Kafka Server, Open another window to start kafka, Duplicate the session & enter in a new console --
+    # Server must be pointing to private server, change server.properties so that it can run in public IP
+    cd kafka_2.12-3.7.0
+    sudo nano config/server.properties              # Change ADVERTISED_LISTENERS to public ip of the EC2 instance
+    export KAFKA_HEAP_OPTS="-Xmx256M -Xms128M"      # Allocates memory to Kafka Server
+    bin/kafka-server-start.sh config/server.properties
+
+    # Also need to allow inbound request from our machine to the EC2 machine, for this Edit inbound rules and allow all traffic -- Note: Not a best practice, only for the project sake
+
+6. Create the topic:
+    cd kafka_2.12-3.7.0
+    Sample: bin/kafka-topics.sh --create --topic <topic_name> --bootstrap-server <Public_IP of EC2 Instance:9092> --replication-factor 1 --partitions 1
+
+    bin/kafka-topics.sh --create --topic input_one --bootstrap-server 3.86.207.59:9092 --replication-factor 1 --partitions 1
+    bin/kafka-topics.sh --create --topic input_two --bootstrap-server 3.86.207.59:9092 --replication-factor 1 --partitions 1
+
+    bin/kafka-topics.sh --list --bootstrap-server 3.86.207.59:9092      # To list all the topics created
+
+7. Start Producer:
+    Sample: bin/kafka-console-producer.sh --topic <topic_name> --bootstrap-server <Public_IP of EC2 Instance:9092>
+    
+    bin/kafka-console-producer.sh --topic input_one --bootstrap-server 3.86.207.59:9092
+
+8. Start Consumer:
+    Sample: bin/kafka-console-consumer.sh --topic <topic_name> --bootstrap-server <Public_IP of EC2 Instance:9092>
+    bin/kafka-console-consumer.sh --topic input_one --bootstrap-server 3.86.207.59:9092
+
+
+
+
+
+
